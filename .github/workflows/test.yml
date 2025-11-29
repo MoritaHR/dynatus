@@ -35,7 +35,7 @@ jobs:
           ${{ runner.os }}-clojure-
     
     - name: Install Clojure CLI
-      uses: DeLaGuardo/setup-clojure@12.5
+      uses: DeLaGuardo/setup-clojure@13.4
       with:
         cli: latest
     
@@ -45,7 +45,7 @@ jobs:
     
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results-java-${{ matrix.java }}
         path: target/test-results/

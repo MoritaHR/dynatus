@@ -37,7 +37,7 @@ jobs:
           ${{ runner.os }}-deps-
     
     - name: Install Clojure
-      uses: DeLaGuardo/setup-clojure@12.5
+      uses: DeLaGuardo/setup-clojure@13.4
       with:
         cli: latest
     
