@@ -223,7 +223,9 @@ The project uses GitHub Actions for automated testing and deployment:
 
 **`deploy_clojars.yml`** - Automated deployment
 - Triggers on version tags (e.g., `v0.1.0`)
-- Builds and deploys to Clojars automatically
+- Uses `jlesquembre/clojars-publish-action@v2` for deployment
+- Builds JAR and deploys to Clojars automatically
+- Creates GitHub releases with installation instructions
 - Requires `CLOJARS_USERNAME` and `CLOJARS_TOKEN` secrets
 
 ### Running Tests Locally
@@ -244,11 +246,23 @@ clojure -M:test -m kaocha.runner --focus dynamigrate.core-test
 
 ### Making a Release
 
-1. Update version in `pom.xml`
-2. Commit changes: `git commit -am "Release v0.1.0"`
-3. Tag the release: `git tag v0.1.0`
-4. Push with tags: `git push origin main --tags`
-5. GitHub Actions will automatically deploy to Clojars
+#### Automated Release (Recommended)
+
+1. Commit your changes: `git commit -am "Prepare release v0.1.0"`
+2. Tag the release: `git tag v0.1.0`
+3. Push with tags: `git push origin main --tags`
+4. GitHub Actions will automatically:
+   - Build the JAR
+   - Deploy to Clojars using `jlesquembre/clojars-publish-action`
+   - Create a GitHub release with installation instructions
+
+#### Manual Release
+
+You can also trigger a deployment manually from GitHub Actions:
+1. Go to Actions → Deploy to Clojars
+2. Click "Run workflow"
+3. Enter the version number (e.g., `0.1.0`)
+4. Click "Run workflow"
 
 ### Setting up GitHub Secrets
 
@@ -257,7 +271,15 @@ For automated deployment, configure these secrets in your GitHub repository:
 1. Go to Settings → Secrets and variables → Actions
 2. Add the following secrets:
    - `CLOJARS_USERNAME`: Your Clojars username
-   - `CLOJARS_TOKEN`: Your Clojars deploy token (get from Clojars → Deploy Tokens)
+   - `CLOJARS_TOKEN`: Your Clojars deploy token (get from [Clojars → Deploy Tokens](https://clojars.org/tokens))
+
+### Deployment Action
+
+This project uses [`jlesquembre/clojars-publish-action@v2`](https://github.com/jlesquembre/clojars-publish-action) for automated Clojars deployment. This action:
+- Handles authentication with Clojars
+- Publishes the JAR with proper metadata
+- Supports both release and snapshot versions
+- Works seamlessly with GitHub Actions
 
 The library includes a GitHub Actions workflow for automatic deployment to Clojars when a new release is created.
 
