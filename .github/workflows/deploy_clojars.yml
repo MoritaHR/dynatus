@@ -25,7 +25,7 @@ jobs:
         run: clojure -X:jar
 
       - name: Deploy to Clojars
-        uses: clojars/action@v1
+        uses: jlesquembre/clojars-publish-action@0.3
         with:
           group-id: io.github.rafaelcampo  
           artifact-id: dynamodb-migrate           
