@@ -5,7 +5,7 @@
             [environ.core :refer [env]]))
 
 (defmethod interceptors/modify-http-request "dynamodb"
-  [service endpoint http-request]
+  [_ _ http-request]
   (let [local-endpoint (env :dynamodb-local-endpoint)]
     (println "Interceptor called. Local endpoint:" local-endpoint)
     (println "Original request:" (select-keys http-request [:scheme :server-name :server-port]))

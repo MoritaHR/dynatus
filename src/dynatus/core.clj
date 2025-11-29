@@ -30,7 +30,7 @@
    Options:
    {:client <aws-client>
     :path   \"resources/dynamo\"}"
-  [{:keys [client path] :as opts}]
+  [{:keys [client path]}]
   (let [defs (loader/load-definitions path)]
     (doseq [definition defs]
       (let [table-name (:TableName definition)

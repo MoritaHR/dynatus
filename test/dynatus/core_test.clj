@@ -1,5 +1,5 @@
 (ns dynatus.core-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [dynatus.core :as core]
             [dynatus.test-client :as test-client]
             [dynatus.loader :as loader]
