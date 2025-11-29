@@ -1,0 +1,18 @@
+{:TableName "users"
+ :KeySchema [{:AttributeName "user_id"
+              :KeyType "HASH"}]
+ :AttributeDefinitions [{:AttributeName "user_id"
+                         :AttributeType "S"}
+                        {:AttributeName "email"
+                         :AttributeType "S"}]
+ :BillingMode "PAY_PER_REQUEST"
+ :GlobalSecondaryIndexes [{:IndexName "email-index"
+                           :KeySchema [{:AttributeName "email"
+                                        :KeyType "HASH"}]
+                           :Projection {:ProjectionType "ALL"}}]
+ :StreamSpecification {:StreamEnabled true
+                       :StreamViewType "NEW_AND_OLD_IMAGES"}
+ :Tags [{:Key "Environment"
+         :Value "production"}
+        {:Key "Application"
+         :Value "dynamigrate"}]}

@@ -1,0 +1,43 @@
+{:paths ["src" "resources"]
+ :deps  {org.clojure/clojure {:mvn/version "1.11.1"}
+         com.cognitect.aws/api {:mvn/version "0.8.686"}
+         com.cognitect.aws/endpoints {:mvn/version "871.2.39.3"}
+         com.cognitect.aws/dynamodb {:mvn/version "871.2.39.3"}
+         environ/environ {:mvn/version "1.2.0"}}
+
+ :aliases
+ {:dev {:extra-paths ["dev"]
+        :extra-deps {org.clojure/tools.namespace {:mvn/version "1.4.4"}
+                     nrepl/nrepl {:mvn/version "1.1.0"}
+                     cider/cider-nrepl {:mvn/version "0.45.0"}}}
+
+  :test {:extra-paths ["test"]
+         :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}
+                      org.testcontainers/testcontainers {:mvn/version "1.19.3"}
+                      org.testcontainers/localstack {:mvn/version "1.19.3"}
+                      org.slf4j/slf4j-simple {:mvn/version "2.0.9"}}}
+  
+  :jar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
+        :exec-fn hf.depstar/jar
+        :exec-args {:jar "target/dynamigrate.jar"
+                    :group-id "net.clojars.rafael-campo"
+                    :artifact-id "dynamigrate"
+                    :version "0.1.0"
+                    :sync-pom true
+                    :pom-file "pom.xml"}}
+
+  :deploy {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.2"}}
+           :exec-fn deps-deploy.deps-deploy/deploy
+           :exec-args {:installer :remote
+                       :sign-releases? false
+                       :artifact "target/dynamigrate.jar"
+                       :pom-file "pom.xml"}}
+  
+  :install {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
+            :exec-fn hf.depstar/jar
+            :exec-args {:jar "target/dynamigrate.jar"
+                        :group-id "net.clojars.rafael-campo"
+                        :artifact-id "dynamigrate"
+                        :version "0.1.0"
+                        :sync-pom true
+                        :install true}}}}
