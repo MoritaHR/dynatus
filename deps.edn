@@ -22,7 +22,7 @@
         :exec-args {:jar "target/dynamigrate.jar"
                     :group-id "dynamigrate"
                     :artifact-id "dynamigrate"
-                    :version "0.1.0"
+                    :version "0.1.0-beta"
                     :sync-pom true}}
 
   :deploy {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.2"}}
