@@ -56,11 +56,11 @@ jobs:
 
       - name: Deploy to Clojars
         run: |
-          echo "Deploying to Clojars..."
-          clojure -X:deploy :artifact '"target/dynamigrate.jar"' :pom-file '"pom.xml"'
+          echo "Deploying org.clojars.morita/dynatus to Clojars..."
+          lein deploy clojars
         env:
           CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
-          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_TOKEN }}
+          CLOJARS_TOKEN: ${{ secrets.CLOJARS_TOKEN }}
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -71,13 +71,13 @@ jobs:
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
           body: |
-            ## Dynamigrate ${{ steps.version.outputs.VERSION }}
+            ## Dynatus ${{ steps.version.outputs.VERSION }}
             
             ### Installation
             
             Add to your `deps.edn`:
             ```clojure
-            {:deps {dynamigrate/dynamigrate {:mvn/version "${{ steps.version.outputs.VERSION }}"}}}
+            {:deps {org.clojars.morita/dynatus {:mvn/version "${{ steps.version.outputs.VERSION }}"}}}
             ```
             
             ### Changelog

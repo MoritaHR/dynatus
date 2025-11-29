@@ -1,10 +1,16 @@
-# Dynatus
+<div align="center">
+  <img src="resources/assets/dynatus_logo.png" alt="Dynatus Logo" width="200"/>
+  
+  # Dynatus
 
-[![CI](https://github.com/your-username/dynatus/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/dynatus/actions/workflows/ci.yml)
-[![Tests](https://github.com/your-username/dynatus/actions/workflows/test.yml/badge.svg)](https://github.com/your-username/dynatus/actions/workflows/test.yml)
-[![Clojars Project](https://img.shields.io/clojars/v/net.clojars.rafael-campo/dynatus.svg)](https://clojars.org/net.clojars.rafael-campo/dynatus)
+  [![CI](https://github.com/your-username/dynatus/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/dynatus/actions/workflows/ci.yml)
+  [![Tests](https://github.com/your-username/dynatus/actions/workflows/test.yml/badge.svg)](https://github.com/your-username/dynatus/actions/workflows/test.yml)
+  [![Clojars Project](https://img.shields.io/clojars/v/org.clojars.morita/dynatus.svg)](https://clojars.org/org.clojars.morita/dynatus)
 
-A Clojure library for managing DynamoDB table migrations and keeping table definitions in sync between local and production environments.
+  **A Clojure library for managing DynamoDB table migrations and keeping table definitions in sync between local and production environments.**
+</div>
+
+---
 
 Highly inspired in migratus and how it is easy to use it. 
 
@@ -22,7 +28,7 @@ Add to your `deps.edn`:
 
 ```clojure
 ;; From Clojars
-{:deps {net.clojars.rafael-campo/dynatus {:mvn/version "0.1.0"}}}
+{:deps {org.clojars.morita/dynatus {:mvn/version "0.1.0"}}}
 
 ;; Or from GitHub
 {:deps {dynatus/dynatus {:git/url "https://github.com/yourusername/dynatus"
