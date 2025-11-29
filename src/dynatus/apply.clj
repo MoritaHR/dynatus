@@ -1,7 +1,7 @@
 (ns dynatus.apply
   (:require [cognitect.aws.client.api :as aws]))
 
-(defn apply-diff [client {:keys [action definition] :as diff}]
+(defn apply-diff [client {:keys [action definition]}]
   (case action
     :noop
     (println "✓ Table" (:TableName definition) "is up to date.")

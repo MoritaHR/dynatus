@@ -19,10 +19,18 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Clojure
-        uses: DeLaGuardo/setup-clojure@12.5
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
-          cli: latest
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Install Leiningen
+        run: |
+          curl -O https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+          chmod +x lein
+          sudo mv lein /usr/local/bin/
+          lein version
           
       - name: Install git credentials
         run: git config --global user.name "github-actions" && git config --global user.email "actions@github.com"
@@ -32,16 +40,10 @@ jobs:
         with:
           path: |
             ~/.m2/repository
-            ~/.gitlibs
-            ~/.clojure/.cpcache
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
+            ~/.lein
+          key: ${{ runner.os }}-lein-${{ hashFiles('**/project.clj') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
-
-      - name: Build JAR
-        run: |
-          echo "Building JAR with pom.xml..."
-          clojure -X:jar :pom-file '"pom.xml"'
+            ${{ runner.os }}-lein-
 
       - name: Determine version
         id: version
@@ -54,13 +56,22 @@ jobs:
             echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           fi
 
+      - name: Update version in project.clj if needed
+        run: |
+          CURRENT_VERSION=$(grep defproject project.clj | sed -E 's/.*"([^"]+)".*/\1/')
+          TARGET_VERSION="${{ steps.version.outputs.VERSION }}"
+          if [ "$CURRENT_VERSION" != "$TARGET_VERSION" ]; then
+            echo "Updating version from $CURRENT_VERSION to $TARGET_VERSION"
+            sed -i "s/\"$CURRENT_VERSION\"/\"$TARGET_VERSION\"/" project.clj
+          fi
+
       - name: Deploy to Clojars
         run: |
-          echo "Deploying org.clojars.morita/dynatus to Clojars..."
+          echo "Deploying org.clojars.morita/dynatus version ${{ steps.version.outputs.VERSION }} to Clojars..."
           lein deploy clojars
         env:
           CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
-          CLOJARS_TOKEN: ${{ secrets.CLOJARS_TOKEN }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_TOKEN }}
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -75,9 +86,14 @@ jobs:
             
             ### Installation
             
-            Add to your `deps.edn`:
+            **Leiningen** (project.clj):
             ```clojure
-            {:deps {org.clojars.morita/dynatus {:mvn/version "${{ steps.version.outputs.VERSION }}"}}}
+            [org.clojars.morita/dynatus "${{ steps.version.outputs.VERSION }}"]
+            ```
+            
+            **deps.edn**:
+            ```clojure
+            org.clojars.morita/dynatus {:mvn/version "${{ steps.version.outputs.VERSION }}"}
             ```
             
             ### Changelog

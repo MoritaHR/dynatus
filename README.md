@@ -3,9 +3,10 @@
   
   # Dynatus
 
-  [![CI](https://github.com/your-username/dynatus/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/dynatus/actions/workflows/ci.yml)
-  [![Tests](https://github.com/your-username/dynatus/actions/workflows/test.yml/badge.svg)](https://github.com/your-username/dynatus/actions/workflows/test.yml)
+  [![CI](https://github.com/MoritaHR/dynatus/actions/workflows/ci.yml/badge.svg)](https://github.com/MoritaHR/dynatus/actions/workflows/ci.yml)
+  [![Tests](https://github.com/MoritaHR/dynatus/actions/workflows/test.yml/badge.svg)](https://github.com/MoritaHR/dynatus/actions/workflows/test.yml)
   [![Clojars Project](https://img.shields.io/clojars/v/org.clojars.morita/dynatus.svg)](https://clojars.org/org.clojars.morita/dynatus)
+  [![Clojars Project](https://img.shields.io/clojars/v/org.clojars.morita/dynatus.svg?include_prereleases)]
 
   **A Clojure library for managing DynamoDB table migrations and keeping table definitions in sync between local and production environments.**
 </div>
@@ -28,10 +29,10 @@ Add to your `deps.edn`:
 
 ```clojure
 ;; From Clojars
-{:deps {org.clojars.morita/dynatus {:mvn/version "0.1.0"}}}
+{:deps {org.clojars.morita/dynatus {:mvn/version "0.1.0-beta"}}}
 
 ;; Or from GitHub
-{:deps {dynatus/dynatus {:git/url "https://github.com/yourusername/dynatus"
+{:deps {dynatus/dynatus {:git/url "https://github.com/MoritaHR/dynatus"
                           :git/sha "LATEST_SHA"}}}
 ```
 
@@ -103,7 +104,7 @@ For local development, you can configure your AWS client to connect to local Dyn
 ### Testing with Testcontainers
 
 ```clojure
-(require '[dynamigrate.test-fixtures :as fixtures])
+(require '[dynatus.test-fixtures :as fixtures])
 
 (use-fixtures :each fixtures/with-dynamodb-container)
 
@@ -123,22 +124,23 @@ For local development, you can configure your AWS client to connect to local Dyn
 clojure -M:test -m kaocha.runner
 
 # Run with specific test
-clojure -M:test -m kaocha.runner --focus dynamigrate.core-test
+clojure -M:test -m kaocha.runner --focus dynatus.core-test
 ```
 
 ## Project Structure
 
 ```
-dynamigrate/
+dynatus/
 ├── deps.edn                 # Dependencies
+├── project.clj              # Leiningen configuration
 ├── src/
-│   └── dynamigrate/
+│   └── dynatus/
 │       ├── core.clj        # Main migration logic
 │       ├── loader.clj      # Table definition loader
 │       ├── diff.clj        # Table comparison logic
 │       └── apply.clj       # Apply migrations
 ├── test/
-│   └── dynamigrate/
+│   └── dynatus/
 │       ├── core_test.clj      # Integration tests
 │       ├── test_fixtures.clj  # Testcontainers setup
 │       └── test_client.clj    # Test-specific client with interceptors
@@ -159,43 +161,54 @@ dynamigrate/
 ### Build JAR
 
 ```bash
-# Build the JAR file
+# Build the JAR file (using Leiningen)
+lein jar
+
+# Or using deps.edn
 clojure -X:jar
 
-# This creates target/dynamigrate.jar
+# This creates target/dynatus.jar
 ```
 
 ### Install Locally
 
 ```bash
-# Install to local Maven repository (~/.m2)
+# Install to local Maven repository (~/.m2) using Leiningen
+lein install
+
+# Or using deps.edn
 clojure -X:install
 ```
 
 ### Deploy to Clojars
 
-First, configure your Clojars credentials in `~/.m2/settings.xml`:
+Deployment is handled through GitHub Actions when you create a new release tag.
 
-```xml
-<settings>
-  <servers>
-    <server>
-      <id>clojars</id>
-      <username>your-username</username>
-      <password>your-deploy-token</password>
-    </server>
-  </servers>
-</settings>
-```
+#### Automated Deployment (Recommended)
 
-Then deploy:
+1. Set up GitHub secrets:
+   - `CLOJARS_USERNAME`: Your Clojars username
+   - `CLOJARS_TOKEN`: Your Clojars deploy token
+
+2. Create and push a version tag:
+   ```bash
+   git tag v0.1.0-beta
+   git push origin v0.1.0-beta
+   ```
+
+3. GitHub Actions will automatically deploy to Clojars
+
+#### Manual Deployment
+
+If you need to deploy manually:
 
 ```bash
-# Deploy to Clojars
-clojure -X:deploy
+# Set environment variables
+export CLOJARS_USERNAME=your-username
+export CLOJARS_PASSWORD=your-deploy-token
 
-# For snapshot versions
-clojure -X:deploy :version '"0.1.0-SNAPSHOT"'
+# Deploy using Leiningen
+lein deploy clojars
 ```
 
 ### Using as a Dependency
@@ -204,10 +217,10 @@ Once deployed to Clojars:
 
 ```clojure
 ;; deps.edn
-{:deps {net.clojars.rafael-campo/dynamigrate {:mvn/version "0.1.0"}}}
+{:deps {org.clojars.morita/dynatus {:mvn/version "0.1.0-beta"}}}
 
 ;; Leiningen project.clj
-[net.clojars.rafael-campo/dynamigrate "0.1.0"]
+[org.clojars.morita/dynatus "0.1.0-beta"]
 ```
 
 ## CI/CD
@@ -232,9 +245,9 @@ The project uses GitHub Actions for automated testing and deployment:
 #### Deployment Workflow
 
 **`deploy_clojars.yml`** - Automated deployment
-- Triggers on version tags (e.g., `v0.1.0`)
-- Uses `jlesquembre/clojars-publish-action@v2` for deployment
-- Builds JAR and deploys to Clojars automatically
+- Triggers on version tags (e.g., `v0.1.0-beta`)
+- Uses Leiningen for building and deployment
+- Automatically updates version in project.clj if needed
 - Creates GitHub releases with installation instructions
 - Requires `CLOJARS_USERNAME` and `CLOJARS_TOKEN` secrets
 
@@ -251,19 +264,19 @@ JAVA_HOME=/path/to/java11 make test
 clojure -M:test -m kaocha.runner --reporter documentation
 
 # Run specific test namespace
-clojure -M:test -m kaocha.runner --focus dynamigrate.core-test
+clojure -M:test -m kaocha.runner --focus dynatus.core-test
 ```
 
 ### Making a Release
 
 #### Automated Release (Recommended)
 
-1. Commit your changes: `git commit -am "Prepare release v0.1.0"`
-2. Tag the release: `git tag v0.1.0`
+1. Commit your changes: `git commit -am "Prepare release v0.1.0-beta"`
+2. Tag the release: `git tag v0.1.0-beta`
 3. Push with tags: `git push origin main --tags`
 4. GitHub Actions will automatically:
-   - Build the JAR
-   - Deploy to Clojars using `jlesquembre/clojars-publish-action`
+   - Build the JAR using Leiningen
+   - Deploy to Clojars with proper credentials
    - Create a GitHub release with installation instructions
 
 #### Manual Release
@@ -271,7 +284,7 @@ clojure -M:test -m kaocha.runner --focus dynamigrate.core-test
 You can also trigger a deployment manually from GitHub Actions:
 1. Go to Actions → Deploy to Clojars
 2. Click "Run workflow"
-3. Enter the version number (e.g., `0.1.0`)
+3. Enter the version number (e.g., `0.1.0-beta`)
 4. Click "Run workflow"
 
 ### Setting up GitHub Secrets
@@ -285,19 +298,14 @@ For automated deployment, configure these secrets in your GitHub repository:
 
 ### Deployment Action
 
-This project uses [`jlesquembre/clojars-publish-action@v2`](https://github.com/jlesquembre/clojars-publish-action) for automated Clojars deployment. This action:
-- Handles authentication with Clojars
+This project uses GitHub Actions with Leiningen for automated Clojars deployment:
+- Handles authentication with Clojars using environment variables
 - Publishes the JAR with proper metadata
 - Supports both release and snapshot versions
-- Works seamlessly with GitHub Actions
+- Automatically updates version in project.clj if needed
+- Creates GitHub releases with proper installation instructions
 
-The library includes a GitHub Actions workflow for automatic deployment to Clojars when a new release is created.
-
-### Setting up GitHub Actions
-
-1. Add your Clojars deploy token as a GitHub secret named `CLOJARS_TOKEN`
-2. Create a new release on GitHub
-3. The workflow will automatically build and deploy to Clojars
+The library includes a GitHub Actions workflow for automatic deployment to Clojars when a new release tag is created.
 
 ## License
 
