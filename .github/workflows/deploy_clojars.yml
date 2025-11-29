@@ -39,7 +39,9 @@ jobs:
             ${{ runner.os }}-deps-
 
       - name: Build JAR
-        run: clojure -X:jar
+        run: |
+          echo "Building JAR with pom.xml..."
+          clojure -X:jar :pom-file '"pom.xml"'
 
       - name: Determine version
         id: version
@@ -55,7 +57,7 @@ jobs:
       - name: Deploy to Clojars
         run: |
           echo "Deploying to Clojars..."
-          clojure -X:deploy :artifact '"target/dynamigrate.jar"'
+          clojure -X:deploy :artifact '"target/dynamigrate.jar"' :pom-file '"pom.xml"'
         env:
           CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
           CLOJARS_PASSWORD: ${{ secrets.CLOJARS_TOKEN }}

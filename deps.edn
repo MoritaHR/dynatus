@@ -23,7 +23,8 @@
                     :group-id "net.clojars.rafael-campo"
                     :artifact-id "dynamigrate"
                     :version "0.1.0"
-                    :sync-pom true}}
+                    :sync-pom true
+                    :pom-file "pom.xml"}}
 
   :deploy {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.2"}}
            :exec-fn deps-deploy.deps-deploy/deploy
