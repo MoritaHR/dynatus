@@ -67,7 +67,8 @@ jobs:
 
       - name: Deploy to Clojars
         run: |
-          echo "Deploying org.clojars.morita/dynatus version ${{ steps.version.outputs.VERSION }} to Clojars..."
+          CLOJARS_GROUP="org.clojars.${{ secrets.CLOJARS_USERNAME }}"
+          echo "Deploying ${CLOJARS_GROUP}/dynatus version ${{ steps.version.outputs.VERSION }} to Clojars..."
           lein deploy clojars
         env:
           CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
@@ -75,12 +76,12 @@ jobs:
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: |
             ## Dynatus ${{ steps.version.outputs.VERSION }}
             
@@ -88,12 +89,12 @@ jobs:
             
             **Leiningen** (project.clj):
             ```clojure
-            [org.clojars.morita/dynatus "${{ steps.version.outputs.VERSION }}"]
+            [org.clojars.${{ vars.CLOJARS_ORG || 'morita' }}/dynatus "${{ steps.version.outputs.VERSION }}"]
             ```
             
             **deps.edn**:
             ```clojure
-            org.clojars.morita/dynatus {:mvn/version "${{ steps.version.outputs.VERSION }}"}
+            org.clojars.${{ vars.CLOJARS_ORG || 'morita' }}/dynatus {:mvn/version "${{ steps.version.outputs.VERSION }}"}
             ```
             
             ### Changelog
