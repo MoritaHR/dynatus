@@ -1,4 +1,4 @@
-(ns dynamigrate.loader
+(ns dynatus.loader
   (:require [clojure.java.io :as io]
             [clojure.edn :as edn]
             [cognitect.aws.client.api :as aws]))

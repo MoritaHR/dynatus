@@ -1,5 +1,5 @@
 (ns user
-  (:require [dynamigrate.test-fixtures :as fixtures]
+  (:require [dynatus.test-fixtures :as fixtures]
             [cognitect.aws.client.api :as aws]))
  
 (defn start-test-env

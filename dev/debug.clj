@@ -1,6 +1,6 @@
 (ns debug
-  (:require [dynamigrate.test-fixtures :as fixtures]
-            [dynamigrate.test-client :as test-client]
+  (:require [dynatus.test-fixtures :as fixtures]
+            [dynatus.test-client :as test-client]
             [clojure.java.shell :as shell]))
 
 

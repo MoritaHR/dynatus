@@ -1,1 +1,8 @@
-#kaocha/v1 {}
+#kaocha/v1
+{:tests [{:id :unit
+          :test-paths ["test"]
+          :source-paths ["src"]
+          :ns-patterns ["dynatus.*-test$"]}]
+ :reporter [kaocha.report/dots]
+ :color? true
+ :fail-fast? false}

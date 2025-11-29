@@ -1,4 +1,4 @@
-(ns dynamigrate.test-client
+(ns dynatus.test-client
   (:require [cognitect.aws.client.api :as aws]
             [cognitect.aws.credentials :as credentials]
             [cognitect.aws.interceptors :as interceptors]

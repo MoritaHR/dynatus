@@ -1,4 +1,4 @@
-(ns dynamigrate.diff)
+(ns dynatus.diff)
 
 (defn compute [desired actual]
   (cond

@@ -1,7 +1,7 @@
-(ns dynamigrate.core
-  (:require [dynamigrate.loader :as loader]
-            [dynamigrate.diff :as diff]
-            [dynamigrate.apply :as apply]
+(ns dynatus.core
+  (:require [dynatus.loader :as loader]
+            [dynatus.diff :as diff]
+            [dynatus.apply :as apply]
             [cognitect.aws.client.api :as aws]))
 
 (defn wait-for-table-active

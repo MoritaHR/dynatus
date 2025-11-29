@@ -1,9 +1,9 @@
-(ns dynamigrate.core-test
+(ns dynatus.core-test
   (:require [clojure.test :refer :all]
-            [dynamigrate.core :as core]
-            [dynamigrate.test-client :as test-client]
-            [dynamigrate.loader :as loader]
-            [dynamigrate.test-fixtures :as fixtures]
+            [dynatus.core :as core]
+            [dynatus.test-client :as test-client]
+            [dynatus.loader :as loader]
+            [dynatus.test-fixtures :as fixtures]
             [cognitect.aws.client.api :as aws]
             [clojure.java.io :as io]))
 

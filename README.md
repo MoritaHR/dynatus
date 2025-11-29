@@ -1,8 +1,8 @@
-# Dynamigrate
+# Dynatus
 
-[![CI](https://github.com/your-username/dynamigrate/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/dynamigrate/actions/workflows/ci.yml)
-[![Tests](https://github.com/your-username/dynamigrate/actions/workflows/test.yml/badge.svg)](https://github.com/your-username/dynamigrate/actions/workflows/test.yml)
-[![Clojars Project](https://img.shields.io/clojars/v/dynamigrate/dynamigrate.svg)](https://clojars.org/dynamigrate/dynamigrate)
+[![CI](https://github.com/your-username/dynatus/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/dynatus/actions/workflows/ci.yml)
+[![Tests](https://github.com/your-username/dynatus/actions/workflows/test.yml/badge.svg)](https://github.com/your-username/dynatus/actions/workflows/test.yml)
+[![Clojars Project](https://img.shields.io/clojars/v/net.clojars.rafael-campo/dynatus.svg)](https://clojars.org/net.clojars.rafael-campo/dynatus)
 
 A Clojure library for managing DynamoDB table migrations and keeping table definitions in sync between local and production environments.
 
@@ -22,11 +22,11 @@ Add to your `deps.edn`:
 
 ```clojure
 ;; From Clojars
-{:deps {net.clojars.rafael-campo/dynamigrate {:mvn/version "0.1.0"}}}
+{:deps {net.clojars.rafael-campo/dynatus {:mvn/version "0.1.0"}}}
 
 ;; Or from GitHub
-{:deps {dynamigrate/dynamigrate {:git/url "https://github.com/yourusername/dynamigrate"
-                                  :git/sha "LATEST_SHA"}}}
+{:deps {dynatus/dynatus {:git/url "https://github.com/yourusername/dynatus"
+                          :git/sha "LATEST_SHA"}}}
 ```
 
 ## Usage
@@ -34,7 +34,7 @@ Add to your `deps.edn`:
 ### Basic Migration
 
 ```clojure
-(require '[dynamigrate.core :as dynamigrate]
+(require '[dynatus.core :as dynatus]
          '[cognitect.aws.client.api :as aws])
 
 ;; Create a DynamoDB client using AWS SDK
@@ -42,8 +42,8 @@ Add to your `deps.edn`:
                                 :region "us-east-1"}))
 
 ;; Run migrations from resources/dynamo directory
-(dynamigrate/migrate {:client dynamo-client
-                      :path "resources/dynamo"})
+(dynatus/migrate {:client dynamo-client
+                  :path "resources/dynamo"})
 ```
 
 The library is designed to work with any Cognitect AWS DynamoDB client, giving you full control over client configuration.

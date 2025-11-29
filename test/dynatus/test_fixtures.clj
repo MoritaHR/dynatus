@@ -1,5 +1,5 @@
-(ns dynamigrate.test-fixtures
-  (:require [dynamigrate.test-client :as test-client]
+(ns dynatus.test-fixtures
+  (:require [dynatus.test-client :as test-client]
             [cognitect.aws.client.api :as aws])
   (:import [org.testcontainers.containers GenericContainer]
            [org.testcontainers.utility DockerImageName]))
