@@ -21,6 +21,10 @@ Highly inspired in migratus and how it is easy to use it.
 Add to your `deps.edn`:
 
 ```clojure
+;; From Clojars
+{:deps {net.clojars.rafael-campo/dynamigrate {:mvn/version "0.1.0"}}}
+
+;; Or from GitHub
 {:deps {dynamigrate/dynamigrate {:git/url "https://github.com/yourusername/dynamigrate"
                                   :git/sha "LATEST_SHA"}}}
 ```
@@ -194,10 +198,10 @@ Once deployed to Clojars:
 
 ```clojure
 ;; deps.edn
-{:deps {dynamigrate/dynamigrate {:mvn/version "0.1.0"}}}
+{:deps {net.clojars.rafael-campo/dynamigrate {:mvn/version "0.1.0"}}}
 
 ;; Leiningen project.clj
-[dynamigrate "0.1.0"]
+[net.clojars.rafael-campo/dynamigrate "0.1.0"]
 ```
 
 ## CI/CD

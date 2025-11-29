@@ -55,7 +55,7 @@ jobs:
       - name: Deploy to Clojars
         uses: jlesquembre/clojars-publish-action@v2
         with:
-          group-id: dynamigrate
+          group-id: net.clojars.rafael-campo  # Use your verified Clojars group
           artifact-id: dynamigrate
           version: ${{ steps.version.outputs.VERSION }}
           jar: target/dynamigrate.jar
