@@ -16,15 +16,15 @@
     ;; Use only valid DynamoDB Local options
     (.withCommand container ^"[Ljava.lang.String;"
                   (into-array String ["-jar" "DynamoDBLocal.jar"
-                                     "-inMemory"
-                                     "-sharedDb"]))
+                                      "-inMemory"
+                                      "-sharedDb"]))
     (.start container)
     container))
 
 (defn get-container-endpoint
   "Get the endpoint URL for the running container"
   [container]
-  (format "http://%s:%d" 
+  (format "http://%s:%d"
           (.getHost container)
           (.getMappedPort container 8000)))
 
@@ -55,7 +55,7 @@
                    :TableNames)]
     (doseq [table-name tables]
       (aws/invoke client {:op :DeleteTable
-                         :request {:TableName table-name}})
+                          :request {:TableName table-name}})
       ;; Wait for deletion
       (Thread/sleep 100))))
 
@@ -65,7 +65,7 @@
   (let [start (System/currentTimeMillis)]
     (loop []
       (let [result (aws/invoke client {:op :DescribeTable
-                                      :request {:TableName table-name}})
+                                       :request {:TableName table-name}})
             status (get-in result [:Table :TableStatus])]
         (println "Table" table-name "status:" status "Result keys:" (keys result))
         (cond
@@ -77,23 +77,23 @@
           (throw (ex-info "Timeout waiting for table"
                           {:table table-name :status status}))
           :else (do (Thread/sleep 100)
-                   (recur)))))))
+                    (recur)))))))
 
 (defn create-test-table
   "Helper to create a simple test table"
-  [client table-name & {:keys [partition-key sort-key] 
+  [client table-name & {:keys [partition-key sort-key]
                         :or {partition-key "id"}}]
   (let [key-schema (cond-> [{:AttributeName partition-key
                              :KeyType "HASH"}]
                      sort-key (conj {:AttributeName sort-key
-                                    :KeyType "RANGE"}))
+                                     :KeyType "RANGE"}))
         attr-defs (cond-> [{:AttributeName partition-key
-                           :AttributeType "S"}]
+                            :AttributeType "S"}]
                     sort-key (conj {:AttributeName sort-key
-                                   :AttributeType "S"}))]
+                                    :AttributeType "S"}))]
     (aws/invoke client {:op :CreateTable
-                       :request {:TableName table-name
-                                :KeySchema key-schema
-                                :AttributeDefinitions attr-defs
-                                :BillingMode "PAY_PER_REQUEST"}})
+                        :request {:TableName table-name
+                                  :KeySchema key-schema
+                                  :AttributeDefinitions attr-defs
+                                  :BillingMode "PAY_PER_REQUEST"}})
     (wait-for-table client table-name)))
