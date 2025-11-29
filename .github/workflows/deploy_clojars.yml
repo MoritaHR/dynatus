@@ -53,15 +53,12 @@ jobs:
           fi
 
       - name: Deploy to Clojars
-        uses: jlesquembre/clojars-publish-action@v2
-        with:
-          group-id: net.clojars.rafael-campo  # Use your verified Clojars group
-          artifact-id: dynamigrate
-          version: ${{ steps.version.outputs.VERSION }}
-          jar: target/dynamigrate.jar
+        run: |
+          echo "Deploying to Clojars..."
+          clojure -X:deploy :artifact '"target/dynamigrate.jar"'
         env:
           CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
-          CLOJARS_TOKEN: ${{ secrets.CLOJARS_TOKEN }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_TOKEN }}
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
