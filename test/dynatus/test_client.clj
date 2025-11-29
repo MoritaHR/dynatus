@@ -14,10 +14,10 @@
       (let [[_ host port-str] (re-matches #"https?://([^:]+):(\d+)" local-endpoint)
             port (Integer/parseInt (or port-str "8000"))
             modified-request (-> http-request
-                                (assoc :scheme :http
-                                       :server-port port
-                                       :server-name host)
-                                (assoc-in [:headers "host"] (str host ":" port)))]
+                                 (assoc :scheme :http
+                                        :server-port port
+                                        :server-name host)
+                                 (assoc-in [:headers "host"] (str host ":" port)))]
         (println "Modified request:" (select-keys modified-request [:scheme :server-name :server-port]))
         modified-request)
       http-request)))
@@ -38,10 +38,8 @@
                ;; Use properly formatted dummy credentials for local testing
                ;; DynamoDB Local validates format but not actual values
                :credentials-provider (credentials/basic-credentials-provider
-                                     {:access-key-id "AKIAIOSFODNN7EXAMPLE"
-                                      :secret-access-key "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"})}))
-
- 
+                                      {:access-key-id "AKIAIOSFODNN7EXAMPLE"
+                                       :secret-access-key "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"})}))
 
 (defn test-connection
   "Test the DynamoDB connection by listing tables"
@@ -59,4 +57,3 @@
       {:status :error
        :message "Exception while connecting to DynamoDB"
        :error (.getMessage e)})))
- 

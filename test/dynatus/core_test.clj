@@ -24,15 +24,15 @@
                      :AttributeDefinitions [{:AttributeName "id"
                                              :AttributeType "S"}]
                      :BillingMode "PAY_PER_REQUEST"}]
-      
+
       ;; Create table
       (let [result (aws/invoke client {:op :CreateTable
                                        :request table-def})]
         (is (not (:cognitect.anomalies/category result))))
-      
+
       ;; Wait for table to be active
       (fixtures/wait-for-table client "test-table")
-      
+
       ;; Verify table exists
       (let [tables (-> (aws/invoke client {:op :ListTables})
                        :TableNames)]
@@ -48,21 +48,21 @@
                      :AttributeDefinitions [{:AttributeName "user_id"
                                              :AttributeType "S"}]
                      :BillingMode "PAY_PER_REQUEST"}]
-      
+
       ;; Create temp directory with table definition
       (.mkdirs temp-dir)
       (spit (io/file temp-dir "users.edn") (pr-str users-def))
-      
+
       (try
         ;; Run migration
         (core/migrate {:client client
-                      :path (.getPath temp-dir)})
-        
+                       :path (.getPath temp-dir)})
+
         ;; Verify table was created
         (let [tables (-> (aws/invoke client {:op :ListTables})
                          :TableNames)]
           (is (some #{"users"} tables)))
-        
+
         ;; Verify table structure
         (let [desc (aws/invoke client {:op :DescribeTable
                                        :request {:TableName "users"}})
@@ -70,7 +70,7 @@
           (is (= "users" (:TableName table)))
           (is (= [{:AttributeName "user_id" :KeyType "HASH"}]
                  (:KeySchema table))))
-        
+
         (finally
           ;; Cleanup
           (.delete (io/file temp-dir "users.edn"))
@@ -92,18 +92,18 @@
                                                :KeySchema [{:AttributeName "category"
                                                             :KeyType "HASH"}]
                                                :Projection {:ProjectionType "ALL"}}]}]
-      
+
       (.mkdirs temp-dir)
       (spit (io/file temp-dir "products.edn") (pr-str table-def))
-      
+
       (try
         ;; Run migration
         (core/migrate {:client client
-                      :path (.getPath temp-dir)})
-        
+                       :path (.getPath temp-dir)})
+
         ;; Wait for table
         (fixtures/wait-for-table client "products")
-        
+
         ;; Verify GSI was created
         (let [desc (aws/invoke client {:op :DescribeTable
                                        :request {:TableName "products"}})
@@ -111,7 +111,7 @@
           (is (= "category-index" (:IndexName gsi)))
           (is (= [{:AttributeName "category" :KeyType "HASH"}]
                  (:KeySchema gsi))))
-        
+
         (finally
           (.delete (io/file temp-dir "products.edn"))
           (.delete temp-dir))))))
@@ -126,27 +126,27 @@
                      :AttributeDefinitions [{:AttributeName "session_id"
                                              :AttributeType "S"}]
                      :BillingMode "PAY_PER_REQUEST"}]
-      
+
       (.mkdirs temp-dir)
       (spit (io/file temp-dir "sessions.edn") (pr-str table-def))
-      
+
       (try
         ;; First migration - creates table
         (core/migrate {:client client
-                      :path (.getPath temp-dir)})
-        
+                       :path (.getPath temp-dir)})
+
         ;; Wait for table
         (fixtures/wait-for-table client "sessions")
-        
+
         ;; Second migration - should be no-op
         (is (nil? (core/migrate {:client client
-                                :path (.getPath temp-dir)})))
-        
+                                 :path (.getPath temp-dir)})))
+
         ;; Table should still exist
         (let [tables (-> (aws/invoke client {:op :ListTables})
                          :TableNames)]
           (is (some #{"sessions"} tables)))
-        
+
         (finally
           (.delete (io/file temp-dir "sessions.edn"))
           (.delete temp-dir))))))
@@ -161,28 +161,28 @@
 (deftest test-migrate-from-resources
   (testing "Migrate tables from resources/dynamo directory"
     (let [client fixtures/*test-client*]
-      
+
       ;; Run migration using actual resource files
       (core/migrate {:client client
-                    :path "resources/dynamo"})
-      
+                     :path "resources/dynamo"})
+
       ;; Wait for tables
       (fixtures/wait-for-table client "users")
       (fixtures/wait-for-table client "orders")
-      
+
       ;; Verify both tables were created
       (let [tables (-> (aws/invoke client {:op :ListTables})
                        :TableNames
                        set)]
         (is (contains? tables "users"))
         (is (contains? tables "orders")))
-      
+
       ;; Verify users table has GSI
       (let [desc (aws/invoke client {:op :DescribeTable
                                      :request {:TableName "users"}})
             gsi (-> desc :Table :GlobalSecondaryIndexes first)]
         (is (= "email-index" (:IndexName gsi))))
-      
+
       ;; Verify orders table has TTL configuration (may be DISABLED in DynamoDB Local)
       (let [ttl-desc (aws/invoke client {:op :DescribeTimeToLive
                                          :request {:TableName "orders"}})
