@@ -1,0 +1,28 @@
+{:TableName "orders"
+ :KeySchema [{:AttributeName "order_id"
+              :KeyType "HASH"}
+             {:AttributeName "created_at"
+              :KeyType "RANGE"}]
+ :AttributeDefinitions [{:AttributeName "order_id"
+                         :AttributeType "S"}
+                        {:AttributeName "created_at"
+                         :AttributeType "N"}
+                        {:AttributeName "user_id"
+                         :AttributeType "S"}
+                        {:AttributeName "status"
+                         :AttributeType "S"}]
+ :BillingMode "PAY_PER_REQUEST"
+ :GlobalSecondaryIndexes [{:IndexName "user-orders-index"
+                           :KeySchema [{:AttributeName "user_id"
+                                        :KeyType "HASH"}
+                                       {:AttributeName "created_at"
+                                        :KeyType "RANGE"}]
+                           :Projection {:ProjectionType "ALL"}}
+                          {:IndexName "status-index"
+                           :KeySchema [{:AttributeName "status"
+                                        :KeyType "HASH"}
+                                       {:AttributeName "created_at"
+                                        :KeyType "RANGE"}]
+                           :Projection {:ProjectionType "KEYS_ONLY"}}]
+ :TimeToLiveSpecification {:AttributeName "ttl"
+                           :Enabled true}}

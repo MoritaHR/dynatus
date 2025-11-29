@@ -1,0 +1,31 @@
+name: Deploy to Clojars
+
+on:
+  push:
+  #release:
+  #  types: [created]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Clojure
+        uses: DeLaGuardo/setup-clojure@v1
+        with:
+          java-version: 17
+          tools-deps: true
+
+      - name: Install git credentials
+        run: git config --global user.name "github-actions" && git config --global user.email "actions@github.com"
+
+      - name: Build jar
+        run: clojure -X:jar
+
+      - name: Deploy to Clojars
+        env:
+          CLOJARS_TOKEN: ${{ secrets.CLOJARS_TOKEN }}
+        run: clojure -X:deploy
