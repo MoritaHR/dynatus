@@ -6,22 +6,24 @@
   [![CI](https://github.com/MoritaHR/dynatus/actions/workflows/ci.yml/badge.svg)](https://github.com/MoritaHR/dynatus/actions/workflows/ci.yml)
   [![Tests](https://github.com/MoritaHR/dynatus/actions/workflows/test.yml/badge.svg)](https://github.com/MoritaHR/dynatus/actions/workflows/test.yml)
   [![Clojars Project](https://img.shields.io/clojars/v/org.clojars.morita/dynatus.svg)](https://clojars.org/org.clojars.morita/dynatus)
-  [![Clojars Project](https://img.shields.io/clojars/v/org.clojars.morita/dynatus.svg?include_prereleases)]
+  [![Clojars Prereleases](https://img.shields.io/clojars/v/org.clojars.morita/dynatus.svg?include_prereleases)]
 
   **A Clojure library for managing DynamoDB table migrations and keeping table definitions in sync between local and production environments.**
 </div>
 
 ---
 
-Highly inspired in migratus and how it is easy to use it. 
+Highly inspired by migratus and how easy it is to use. Dynatus provides a simple, declarative way to manage DynamoDB table schemas across environments.
 
 ## Features
 
 - 📦 EDN-based table definitions
-- 🔄 Automatic table creation and updates
+- 🔄 Automatic table creation and synchronization
+- 🎯 Idempotent operations - safe to run multiple times
 - 🐳 Testcontainers support for integration testing
 - 🏠 Local DynamoDB support via interceptors
-- ⚡ Simple API for migrations
+- ⚡ Simple API with detailed result reporting
+- 🔍 Granular control with low-level and high-level APIs
 
 ## Installation
 
@@ -38,7 +40,7 @@ Add to your `deps.edn`:
 
 ## Usage
 
-### Basic Migration
+### Quick Start
 
 ```clojure
 (require '[dynatus.core :as dynatus]
@@ -48,12 +50,49 @@ Add to your `deps.edn`:
 (def dynamo-client (aws/client {:api :dynamodb
                                 :region "us-east-1"}))
 
-;; Run migrations from resources/dynamo directory
-(dynatus/migrate {:client dynamo-client
-                  :path "resources/dynamo"})
+;; Synchronize tables from EDN files in resources/dynamo
+(dynatus/syncronizate {:client dynamo-client
+                       :path "resources/dynamo"})
+;; => {:sync true
+;;     :count 2
+;;     :migrated [{:table "users" :action :create}
+;;                {:table "orders" :action :create}]}
 ```
 
-The library is designed to work with any Cognitect AWS DynamoDB client, giving you full control over client configuration.
+### API Overview
+
+Dynatus provides two main functions for managing DynamoDB tables:
+
+#### `syncronizate` - High-level synchronization
+
+Loads table definitions from EDN files and synchronizes them with DynamoDB:
+
+```clojure
+(dynatus/syncronizate {:client dynamo-client
+                       :path "resources/dynamo"}) ; optional, defaults to "./resources/dynamo"
+```
+
+**Returns:**
+- On success: `{:sync true :count n :migrated [{:table "name" :action :create/:noop/:recreate}...]}`
+- On empty directory: `{:sync false :reason "No DynamoDB migration files found." :path "..."}`
+- On error: `{:sync false :reason "Exception..." :error "error message"}`
+
+#### `execute-tables-sync` - Low-level table operations
+
+Directly synchronizes a collection of table definitions:
+
+```clojure
+(def table-defs
+  [{:TableName "users"
+    :KeySchema [{:AttributeName "user_id" :KeyType "HASH"}]
+    :AttributeDefinitions [{:AttributeName "user_id" :AttributeType "S"}]
+    :BillingMode "PAY_PER_REQUEST"}])
+
+(dynatus/execute-tables-sync dynamo-client table-defs)
+;; => [{:table "users" :action :create}]
+```
+
+**Returns:** Vector of `{:table "name" :action :create/:noop/:recreate}` for each table processed.
 
 ### Table Definition Format
 
@@ -81,7 +120,7 @@ Create `.edn` files in your migrations directory:
 
 ### Local Development
 
-For local development, you can configure your AWS client to connect to local DynamoDB:
+For local development, configure your AWS client to connect to local DynamoDB:
 
 ```clojure
 (require '[cognitect.aws.client.api :as aws]
@@ -99,6 +138,9 @@ For local development, you can configure your AWS client to connect to local Dyn
 ;; Create client - interceptor will redirect to local
 (def local-client (aws/client {:api :dynamodb
                                :region "us-east-1"}))
+
+;; Synchronize tables
+(dynatus/syncronizate {:client local-client})
 ```
 
 ### Testing with Testcontainers
@@ -112,9 +154,54 @@ For local development, you can configure your AWS client to connect to local Dyn
   (testing "DynamoDB operations"
     ;; Use fixtures/*test-client* which is automatically connected
     ;; to a DynamoDB container
-    (let [client fixtures/*test-client*]
-      ;; Your test code here
+    (let [client fixtures/*test-client*
+          result (dynatus/syncronizate {:client client
+                                        :path "test/resources/tables"})]
+      (is (= true (:sync result)))
+      ;; Your test assertions here
       )))
+```
+
+## Understanding the Synchronization Process
+
+### Actions
+
+Dynatus performs three types of actions on tables:
+
+1. **`:create`** - Table doesn't exist and will be created
+2. **`:noop`** - Table exists and matches the definition (no operation needed)
+3. **`:recreate`** - Table exists but key schema has changed (requires recreation)
+
+### Idempotency
+
+All operations are idempotent - running `syncronizate` multiple times is safe:
+
+```clojure
+;; First run - creates tables
+(dynatus/syncronizate {:client client})
+;; => {:sync true :count 2 :migrated [{:table "users" :action :create}...]}
+
+;; Second run - no changes needed
+(dynatus/syncronizate {:client client})
+;; => {:sync true :count 2 :migrated [{:table "users" :action :noop}...]}
+```
+
+### Error Handling
+
+The library provides detailed error information:
+
+```clojure
+;; Empty directory
+(dynatus/syncronizate {:client client :path "empty/dir"})
+;; => {:sync false 
+;;     :reason "No DynamoDB migration files found."
+;;     :path "empty/dir"}
+
+;; Connection error
+(dynatus/syncronizate {:client bad-client})
+;; => {:sync false
+;;     :reason "Exception while executing DynamoDB sync."
+;;     :error "Connection refused"}
 ```
 
 ## Running Tests
@@ -125,6 +212,9 @@ clojure -M:test -m kaocha.runner
 
 # Run with specific test
 clojure -M:test -m kaocha.runner --focus dynatus.core-test
+
+# Run tests in watch mode
+clojure -M:test -m kaocha.runner --watch
 ```
 
 ## Project Structure
@@ -135,7 +225,7 @@ dynatus/
 ├── project.clj              # Leiningen configuration
 ├── src/
 │   └── dynatus/
-│       ├── core.clj        # Main migration logic
+│       ├── core.clj        # Main API (syncronizate, execute-tables-sync)
 │       ├── loader.clj      # Table definition loader
 │       ├── diff.clj        # Table comparison logic
 │       └── apply.clj       # Apply migrations
@@ -149,6 +239,52 @@ dynatus/
         ├── users.edn
         └── orders.edn
 ```
+
+## API Reference
+
+### Core Functions
+
+#### `syncronizate`
+```clojure
+(syncronizate {:client aws-client
+               :path "path/to/edn/files"}) ; optional
+```
+High-level function that loads EDN files from a directory and synchronizes tables with DynamoDB.
+
+**Parameters:**
+- `:client` - AWS DynamoDB client (required)
+- `:path` - Path to directory containing EDN files (optional, defaults to "./resources/dynamo")
+
+**Returns:**
+- Success: `{:sync true :count n :migrated [...]}`
+- Failure: `{:sync false :reason "..." :error "..." :path "..."}`
+
+#### `execute-tables-sync`
+```clojure
+(execute-tables-sync client table-definitions)
+```
+Low-level function that synchronizes a collection of table definitions.
+
+**Parameters:**
+- `client` - AWS DynamoDB client
+- `table-definitions` - Collection of table definition maps
+
+**Returns:**
+- Vector of `{:table "name" :action :create/:noop/:recreate}`
+
+#### `wait-for-table-active`
+```clojure
+(wait-for-table-active client table-name)
+```
+Waits for a table to become active after creation.
+
+**Parameters:**
+- `client` - AWS DynamoDB client
+- `table-name` - Name of the table to wait for
+
+**Returns:**
+- `true` when table is active
+- `nil` if timeout occurs
 
 ## Environment Variables
 
@@ -296,16 +432,24 @@ For automated deployment, configure these secrets in your GitHub repository:
    - `CLOJARS_USERNAME`: Your Clojars username
    - `CLOJARS_TOKEN`: Your Clojars deploy token (get from [Clojars → Deploy Tokens](https://clojars.org/tokens))
 
-### Deployment Action
+## Migration from Previous Versions
 
-This project uses GitHub Actions with Leiningen for automated Clojars deployment:
-- Handles authentication with Clojars using environment variables
-- Publishes the JAR with proper metadata
-- Supports both release and snapshot versions
-- Automatically updates version in project.clj if needed
-- Creates GitHub releases with proper installation instructions
+If you were using the previous `migrate` function, update your code:
 
-The library includes a GitHub Actions workflow for automatic deployment to Clojars when a new release tag is created.
+```clojure
+;; Old API
+(dynatus/migrate {:client client :path "resources/dynamo"})
+
+;; New API
+(dynatus/syncronizate {:client client :path "resources/dynamo"})
+;; Returns more detailed information about the synchronization
+```
+
+The new API provides:
+- Better error handling with detailed failure reasons
+- Explicit success/failure status
+- Detailed migration results for each table
+- Support for default paths
 
 ## License
 
