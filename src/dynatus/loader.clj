@@ -9,6 +9,7 @@
        (mapv (fn [f]
                (edn/read-string (slurp f))))))
 
+
 (defn describe-table [client table-name]
   (let [res (aws/invoke client {:op :DescribeTable
                                 :request {:TableName table-name}})]

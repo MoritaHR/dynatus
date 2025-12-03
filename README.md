@@ -114,6 +114,8 @@ Create `.edn` files in your migrations directory:
                            :Projection {:ProjectionType "ALL"}}]
  :StreamSpecification {:StreamEnabled true
                        :StreamViewType "NEW_AND_OLD_IMAGES"}
+ :TimeToLiveSpecification {:Enabled true
+                           :AttributeName "ttl"}
  :Tags [{:Key "Environment"
          :Value "production"}]}
 ```
@@ -161,6 +163,26 @@ For local development, configure your AWS client to connect to local DynamoDB:
       ;; Your test assertions here
       )))
 ```
+
+### Time-to-Live (TTL) Support
+
+Dynatus supports automatic configuration of DynamoDB Time-to-Live settings. Simply include a `TimeToLiveSpecification` in your table definition:
+
+```clojure
+;; resources/dynamo/sessions.edn
+{:TableName "sessions"
+ :KeySchema [{:AttributeName "session_id"
+              :KeyType "HASH"}]
+ :AttributeDefinitions [{:AttributeName "session_id"
+                         :AttributeType "S"}
+                        {:AttributeName "expiry"
+                         :AttributeType "N"}]
+ :BillingMode "PAY_PER_REQUEST"
+ :TimeToLiveSpecification {:Enabled true
+                           :AttributeName "expiry"}}
+```
+
+The TTL will be automatically configured after the table is created and becomes active. The `expiry` attribute should contain a Unix timestamp (seconds since epoch) indicating when the item should expire.
 
 ## Understanding the Synchronization Process
 
