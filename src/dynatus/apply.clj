@@ -9,8 +9,14 @@
     :create
     (do
       (println "➕ Creating table" (:TableName definition))
-      (aws/invoke client {:op :CreateTable
-                          :request definition}))
+      (let [result (aws/invoke client {:op :CreateTable
+                                       :request definition})]
+        (if (:cognitect.anomalies/category result)
+          (println "  ⚠ Failed to create table:"
+                   (:cognitect.anomalies/category result)
+                   (:cognitect.anomalies/message result))
+          (println "  ✓ Table creation initiated"))
+        result))
 
     :recreate
     (do

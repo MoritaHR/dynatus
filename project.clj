@@ -7,18 +7,19 @@
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [com.cognitect.aws/api "0.8.686"]
                  [com.cognitect.aws/endpoints "871.2.39.3"]
-                 [com.cognitect.aws/dynamodb "871.2.39.3"]
-                 [environ/environ "1.2.0"]]
+                 [com.cognitect.aws/dynamodb "871.2.39.3"]]
 
   :source-paths ["src"]
   :resource-paths ["resources"]
 
-  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "1.4.4"]
+  :profiles {:dev {:dependencies [[environ/environ "1.2.0"]
+                                  [org.clojure/tools.namespace "1.4.4"]
                                   [nrepl/nrepl "1.1.0"]
                                   [cider/cider-nrepl "0.45.0"]]
                    :source-paths ["dev"]}
 
-             :test {:dependencies [[lambdaisland/kaocha "1.91.1392"]
+             :test {:dependencies [[environ/environ "1.2.0"]
+                                   [lambdaisland/kaocha "1.91.1392"]
                                    [org.testcontainers/testcontainers "1.19.3"]
                                    [org.testcontainers/localstack "1.19.3"]
                                    [org.slf4j/slf4j-simple "2.0.9"]]
