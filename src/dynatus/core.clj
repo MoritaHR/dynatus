@@ -26,7 +26,10 @@
           
           ;; Handle anomalies (table doesn't exist yet)
           (:cognitect.anomalies/category result)
-          (do (println "  Table" table-name "not ready yet, waiting...")
+          (do (println "  Table" table-name "not ready yet, waiting..."
+                       "Anomaly:" (:cognitect.anomalies/category result))
+              (when (= attempts 0)
+                (println "  First attempt anomaly details:" result))
               (recur (inc attempts)))
           
           ;; DynamoDB Local might return the table immediately as ACTIVE
@@ -36,7 +39,7 @@
               true)
           
           :else
-          (do (println "  Waiting for table" table-name "...")
+          (do (println "  Waiting for table" table-name "... Result keys:" (keys result))
               (recur (inc attempts))))))))
 
 (defn update-time-to-live
