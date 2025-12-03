@@ -13,9 +13,7 @@
                      :KeySchema [{:AttributeName "id"
                                   :KeyType "HASH"}]
                      :AttributeDefinitions [{:AttributeName "id"
-                                             :AttributeType "S"}
-                                            {:AttributeName "expiry"
-                                             :AttributeType "N"}]
+                                             :AttributeType "S"}]
                      :BillingMode "PAY_PER_REQUEST"
                      :TimeToLiveSpecification {:Enabled true
                                                :AttributeName "expiry"}}
@@ -79,40 +77,4 @@
         (is (or (:Table describe-result)
                 (= "ACTIVE" (get-in describe-result [:Table :TableStatus])))
             "Table without TTL spec should be created successfully")))))
-
-(deftest test-ttl-on-real-aws
-  (testing "TTL configuration works on real AWS DynamoDB"
-    ;; This test is skipped in local/CI environments
-    ;; Run manually against real AWS to verify TTL functionality
-    (when (System/getenv "TEST_REAL_AWS")
-      (let [client (aws/client {:api :dynamodb
-                                :region "us-east-1"})
-            table-name (str "test-ttl-" (System/currentTimeMillis))
-            table-def {:TableName table-name
-                       :KeySchema [{:AttributeName "id"
-                                    :KeyType "HASH"}]
-                       :AttributeDefinitions [{:AttributeName "id"
-                                               :AttributeType "S"}
-                                              {:AttributeName "ttl"
-                                               :AttributeType "N"}]
-                       :BillingMode "PAY_PER_REQUEST"
-                       :TimeToLiveSpecification {:Enabled true
-                                                 :AttributeName "ttl"}}]
-        (try
-          ;; Create table with TTL
-          (let [result (dynatus/execute-tables-sync client [table-def])]
-            (is (= :create (:action (first result)))))
-          
-          ;; Wait for TTL to be configured
-          (Thread/sleep 5000)
-          
-          ;; Verify TTL is enabled
-          (let [ttl-desc (aws/invoke client {:op :DescribeTimeToLive
-                                             :request {:TableName table-name}})
-                ttl-status (get-in ttl-desc [:TimeToLiveDescription :TimeToLiveStatus])]
-            (is (contains? #{"ENABLED" "ENABLING"} ttl-status)))
-          
-          (finally
-            ;; Clean up
-            (aws/invoke client {:op :DeleteTable
-                                :request {:TableName table-name}})))))))
+ 

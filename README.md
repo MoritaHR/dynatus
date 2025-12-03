@@ -174,15 +174,15 @@ Dynatus supports automatic configuration of DynamoDB Time-to-Live settings. Simp
  :KeySchema [{:AttributeName "session_id"
               :KeyType "HASH"}]
  :AttributeDefinitions [{:AttributeName "session_id"
-                         :AttributeType "S"}
-                        {:AttributeName "expiry"
-                         :AttributeType "N"}]
+                         :AttributeType "S"}]
  :BillingMode "PAY_PER_REQUEST"
  :TimeToLiveSpecification {:Enabled true
                            :AttributeName "expiry"}}
 ```
 
 The TTL will be automatically configured after the table is created and becomes active. The `expiry` attribute should contain a Unix timestamp (seconds since epoch) indicating when the item should expire.
+
+**Note:** The TTL attribute (`expiry` in this example) should NOT be included in `AttributeDefinitions` unless it's also used as a key attribute or in an index. DynamoDB only requires attributes to be defined if they're part of the key schema or indexes.
 
 ## Understanding the Synchronization Process
 

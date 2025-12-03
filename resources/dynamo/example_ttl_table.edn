@@ -4,9 +4,7 @@
  :AttributeDefinitions [{:AttributeName "session_id"
                          :AttributeType "S"}
                         {:AttributeName "user_id"
-                         :AttributeType "S"}
-                        {:AttributeName "ttl"
-                         :AttributeType "N"}]
+                         :AttributeType "S"}]
  :BillingMode "PAY_PER_REQUEST"
  :GlobalSecondaryIndexes [{:IndexName "user-index"
                            :KeySchema [{:AttributeName "user_id"
